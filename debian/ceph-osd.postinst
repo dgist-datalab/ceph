@@ -1,3 +1,4 @@
+#!/bin/sh
 # vim: set noet ts=8:
 # postinst script for ceph-osd
 #
@@ -23,8 +24,12 @@ set -e
 
 case "$1" in
     configure)
-	[ -x /etc/init.d/procps ] && invoke-rc.d procps restart || :
-	[ -x /sbin/start ] && start ceph-osd-all || :
+	if [ -x /lib/systemd/systemd-sysctl ] ; then
+		/lib/systemd/systemd-sysctl 30-ceph-osd.conf || true
+	fi
+	if ! dpkg-statoverride --list /var/lib/ceph/osd >/dev/null; then
+		chown $SERVER_USER:$SERVER_GROUP /var/lib/ceph/osd
+	fi
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
 	:

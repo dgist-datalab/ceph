@@ -1,11 +1,11 @@
-#! /usr/bin/dh-exec --with=install
-
-etc/bash_completion.d/ceph
-etc/bash_completion.d/rados
-etc/bash_completion.d/radosgw-admin
-etc/bash_completion.d/rbd
+#!/usr/bin/dh-exec --with=install
+usr/share/bash-completion/completions/ceph
+usr/share/bash-completion/completions/rados
+usr/share/bash-completion/completions/radosgw-admin
+usr/share/bash-completion/completions/rbd
 lib/systemd/system/ceph.target
 lib/systemd/system/rbdmap.service
+etc/default/ceph
 usr/bin/ceph
 usr/bin/ceph-authtool
 usr/bin/ceph-conf
@@ -23,9 +23,9 @@ usr/bin/rbdmap
 usr/bin/rbd-replay*
 usr/bin/ceph-post-file
 usr/sbin/mount.ceph sbin
-usr/lib/ceph/compressor/*
-usr/lib/ceph/denc/*
-usr/lib/ceph/crypto/* [amd64]
+usr/lib/*/ceph/compressor/*
+usr/lib/*/ceph/crypto/* [amd64]
+usr/lib/*/ceph/denc/*
 usr/share/man/man8/ceph-authtool.8
 usr/share/man/man8/ceph-conf.8
 usr/share/man/man8/ceph-dencoder.8

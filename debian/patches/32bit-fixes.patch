@@ -1,0 +1,154 @@
+Description: Misc fixes for 32 bit architecture builds.
+Author: James Page <james.page@ubuntu.com>
+Forwarded: no
+
+--- a/src/SimpleRADOSStriper.cc
++++ b/src/SimpleRADOSStriper.cc
+@@ -140,7 +140,7 @@
+   return 0;
+ }
+ 
+-int SimpleRADOSStriper::truncate(uint64_t size)
++int SimpleRADOSStriper::truncate(size_t size)
+ {
+   d(5) << size << dendl;
+ 
+--- a/src/os/bluestore/BlueFS.cc
++++ b/src/os/bluestore/BlueFS.cc
+@@ -4578,11 +4578,11 @@
+ 
+ size_t BlueFS::probe_alloc_avail(int dev, uint64_t alloc_size)
+ {
+-  size_t total = 0;
+-  auto iterated_allocation = [&](size_t off, size_t len) {
++  uint64_t total = 0;
++  auto iterated_allocation = [&](uint64_t off, uint64_t len) {
+     //only count in size that is alloc_size aligned
+-    size_t dist_to_alignment;
+-    size_t offset_in_block = off & (alloc_size - 1);
++    uint64_t dist_to_alignment;
++    uint64_t offset_in_block = off & (alloc_size - 1);
+     if (offset_in_block == 0)
+       dist_to_alignment = 0;
+     else
+--- a/src/os/bluestore/BlueStore.cc
++++ b/src/os/bluestore/BlueStore.cc
+@@ -18751,7 +18751,7 @@
+   uint64_t        extent_count       = 0;
+   uint64_t        extents_bytes_left = file_size - (header_size + trailer_size + sizeof(crc));
+   while (extents_bytes_left) {
+-    int req_bytes  = std::min(extents_bytes_left, sizeof(buffer));
++    int req_bytes  = std::min(extents_bytes_left, static_cast<uint64_t>(sizeof(buffer)));
+     int read_bytes = bluefs->read(p_handle.get(), offset, req_bytes, nullptr, (char*)buffer);
+     if (read_bytes != req_bytes) {
+       derr << "Failed bluefs->read()::read_bytes=" << read_bytes << ", req_bytes=" << req_bytes << dendl;
+--- a/src/rgw/store/dbstore/sqlite/sqliteDB.cc
++++ b/src/rgw/store/dbstore/sqlite/sqliteDB.cc
+@@ -512,10 +512,13 @@
+   if (!stmt)
+     return -1;
+ 
++  int64_t start_date;
++
+   op.lc_head.index = (const char*)sqlite3_column_text(stmt, LCHeadIndex);
+   op.lc_head.head.marker = (const char*)sqlite3_column_text(stmt, LCHeadMarker);
+  
+-  SQL_DECODE_BLOB_PARAM(dpp, stmt, LCHeadStartDate, op.lc_head.head.start_date, sdb);
++  SQL_DECODE_BLOB_PARAM(dpp, stmt, LCHeadStartDate, start_date, sdb);
++  op.lc_head.head.start_date = start_date;
+ 
+   return 0;
+ }
+@@ -2773,7 +2776,7 @@
+   SQL_BIND_TEXT(dpp, stmt, index, params->op.lc_head.head.marker.c_str(), sdb);
+ 
+   SQL_BIND_INDEX(dpp, stmt, index, p_params.op.lc_head.start_date.c_str(), sdb);
+-  SQL_ENCODE_BLOB_PARAM(dpp, stmt, index, params->op.lc_head.head.start_date, sdb);
++  SQL_ENCODE_BLOB_PARAM(dpp, stmt, index, (int64_t)params->op.lc_head.head.start_date, sdb);
+ 
+ out:
+   return rc;
+--- a/src/test/libcephfs/ceph_pthread_self.h
++++ b/src/test/libcephfs/ceph_pthread_self.h
+@@ -25,7 +25,7 @@
+   static_assert(std::is_convertible_v<decltype(me), uint64_t> ||
+                 std::is_pointer_v<decltype(me)>,
+                 "we need to use pthread_self() for the owner parameter");
+-  return reinterpret_cast<uint64_t>(me);
++  return static_cast<uint64_t>(me);
+ }
+ 
+ #endif
+--- a/src/tools/cephfs_mirror/FSMirror.cc
++++ b/src/tools/cephfs_mirror/FSMirror.cc
+@@ -348,7 +348,7 @@
+     std::scoped_lock locker(m_lock);
+     m_directories.emplace(dir_path);
+     m_service_daemon->add_or_update_fs_attribute(m_filesystem.fscid, SERVICE_DAEMON_DIR_COUNT_KEY,
+-                                                 m_directories.size());
++                                                 static_cast<uint64_t>(m_directories.size()));
+ 
+     for (auto &[peer, peer_replayer] : m_peer_replayers) {
+       dout(10) << ": peer=" << peer << dendl;
+@@ -366,7 +366,7 @@
+     if (it != m_directories.end()) {
+       m_directories.erase(it);
+       m_service_daemon->add_or_update_fs_attribute(m_filesystem.fscid, SERVICE_DAEMON_DIR_COUNT_KEY,
+-                                                   m_directories.size());
++                                                   static_cast<uint64_t>(m_directories.size()));
+       for (auto &[peer, peer_replayer] : m_peer_replayers) {
+         dout(10) << ": peer=" << peer << dendl;
+         peer_replayer->remove_directory(dir_path);
+--- a/src/tools/neorados.cc
++++ b/src/tools/neorados.cc
+@@ -146,7 +146,7 @@
+ 			     obj, pname));
+ }
+ 
+-inline constexpr std::size_t io_size = 4 << 20;
++inline constexpr std::uint64_t io_size = 4 << 20;
+ 
+ void write(R::RADOS& r, const std::vector<std::string>& p, s::yield_context y)
+ {
+@@ -156,7 +156,7 @@
+ 
+   bs::error_code ec;
+   std::unique_ptr<char[]> buf = std::make_unique<char[]>(io_size);
+-  std::size_t off = 0;
++  std::uint64_t off = 0;
+   boost::io::ios_exception_saver ies(std::cin);
+ 
+   std::cin.exceptions(std::istream::badbit);
+--- a/src/tools/rbd_mirror/image_replayer/snapshot/Replayer.cc
++++ b/src/tools/rbd_mirror/image_replayer/snapshot/Replayer.cc
+@@ -253,7 +253,8 @@
+ 
+   json_spirit::mObject root_obj;
+   root_obj["replay_state"] = replay_state;
+-  root_obj["remote_snapshot_timestamp"] = remote_snap_info->timestamp.sec();
++  root_obj["remote_snapshot_timestamp"] = static_cast<uint64_t>(
++    remote_snap_info->timestamp.sec());
+ 
+   auto matching_remote_snap_id = util::compute_remote_snap_id(
+     m_state_builder->local_image_ctx->image_lock,
+@@ -267,8 +268,8 @@
+     // use the timestamp from the matching remote image since
+     // the local snapshot would just be the time the snapshot was
+     // synced and not the consistency point in time.
+-    root_obj["local_snapshot_timestamp"] =
+-      matching_remote_snap_it->second.timestamp.sec();
++    root_obj["local_snapshot_timestamp"] = static_cast<uint64_t>(
++      matching_remote_snap_it->second.timestamp.sec());
+   }
+ 
+   matching_remote_snap_it = m_state_builder->remote_image_ctx->snap_info.find(
+@@ -276,7 +277,8 @@
+   if (m_remote_snap_id_end != CEPH_NOSNAP &&
+       matching_remote_snap_it !=
+         m_state_builder->remote_image_ctx->snap_info.end()) {
+-    root_obj["syncing_snapshot_timestamp"] = remote_snap_info->timestamp.sec();
++    root_obj["syncing_snapshot_timestamp"] = static_cast<uint64_t>(
++	remote_snap_info->timestamp.sec());
+ 
+     if (m_local_object_count > 0) {
+       root_obj["syncing_percent"] =

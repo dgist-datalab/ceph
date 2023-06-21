@@ -23,22 +23,20 @@ set -e
 [ -z "$SERVER_GROUP" ] && SERVER_GROUP=ceph
 
 case "$1" in
-    configure)
-	[ -x /sbin/start ] && start ceph-mds-all || :
+	configure)
+                if ! dpkg-statoverride --list /var/lib/ceph/mds >/dev/null;
+		then
+			chown $SERVER_USER:$SERVER_GROUP /var/lib/ceph/mds
+		fi
+	;;
+	abort-upgrade|abort-remove|abort-deconfigure)
+		:
+	;;
 
-	if ! dpkg-statoverride --list /var/lib/ceph/mds >/dev/null
-	then
-            chown $SERVER_USER:$SERVER_GROUP /var/lib/ceph/mds
-	fi
-    ;;
-    abort-upgrade|abort-remove|abort-deconfigure)
-	:
-    ;;
-
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+		echo "postinst called with unknown argument \`$1'" >&2
+		exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
@@ -47,5 +45,3 @@ esac
 #DEBHELPER#
 
 exit 0
-
-

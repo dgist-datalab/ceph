@@ -1,3 +1,4 @@
+#!/bin/bash
 # vim: set noet ts=8:
 # postinst script for ceph-mon
 #
@@ -23,7 +24,16 @@ set -e
 
 case "$1" in
     configure)
-	[ -x /sbin/start ] && start ceph-mon-all || :
+	if ! dpkg-statoverride --list /var/lib/ceph/mon >/dev/null; then
+	    if [ -d /run/systemd/system ]; then
+		# NOTE: upgrade file permissions for mon filesystem on
+		#       systemd based installs only due to automatic
+		#       restarting of ceph-mon daemon
+		chown -R $SERVER_USER:$SERVER_GROUP /var/lib/ceph/mon
+	    else
+		chown $SERVER_USER:$SERVER_GROUP /var/lib/ceph/mon
+	    fi
+        fi
     ;;
     abort-upgrade|abort-remove|abort-deconfigure)
 	:

@@ -29,26 +29,28 @@ set -e
 [ -z "$SERVER_GROUP" ] && SERVER_GROUP=ceph
 
 case "$1" in
-    configure)
-	rm -f /etc/init/ceph.conf
-	[ -x /sbin/start ] && start ceph-all || :
-
-        # adjust file and directory permissions
-	for DIR in /var/lib/ceph/* ; do
-	    if ! dpkg-statoverride --list $DIR >/dev/null
-	    then
-		chown $SERVER_USER:$SERVER_GROUP $DIR
-	    fi
-	done
-    ;;
-    abort-upgrade|abort-remove|abort-deconfigure)
-	:
-    ;;
-
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	configure)
+		rm -f /etc/init/ceph.conf
+		for DIR in `ls -1 /var/lib/ceph` ; do
+		    if ! dpkg-statoverride --list /var/lib/ceph/$DIR >/dev/null; then
+			if [ -d /run/systemd/system ] && [ $DIR = 'mon' ]; then
+			    # NOTE: upgrade file permissions for mon filesystem on
+			    #       systemd based installs only due to automatic
+			    #       restarting of ceph-mon daemon
+			    chown -R $SERVER_USER:$SERVER_GROUP /var/lib/ceph/$DIR
+			else
+                            chown $SERVER_USER:$SERVER_GROUP /var/lib/ceph/$DIR
+			fi
+		    fi
+		done
+	;;
+	abort-upgrade|abort-remove|abort-deconfigure)
+		:
+	;;
+	*)
+		echo "postinst called with unknown argument \`$1'" >&2
+		exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
@@ -57,5 +59,3 @@ esac
 #DEBHELPER#
 
 exit 0
-
-

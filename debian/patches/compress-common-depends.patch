@@ -1,0 +1,19 @@
+Description: Depend on common objects from compressor
+ Ensure that common objects are built prior to the
+ compressor objects as the compressor depends on the
+ configuration headers which are generated at build
+ time.
+Author: James Page <james.page@ubuntu.com>
+Forwarded: https://github.com/ceph/ceph/pull/44936
+
+--- a/src/compressor/CMakeLists.txt
++++ b/src/compressor/CMakeLists.txt
+@@ -5,6 +5,8 @@ if (HAVE_QATZIP)
+   list(APPEND compressor_srcs QatAccel.cc)
+ endif()
+ add_library(compressor_objs OBJECT ${compressor_srcs})
++add_dependencies(compressor_objs common-objs)
++
+ if(HAVE_QATZIP AND HAVE_QATDRV)
+   target_link_libraries(compressor_objs PRIVATE
+                         QatDrv::qat_s
