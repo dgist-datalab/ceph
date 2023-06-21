@@ -18,10 +18,7 @@ from cpython.pycapsule cimport *
 from libc cimport errno
 from libc.stdint cimport *
 from libc.stdlib cimport malloc, realloc, free
-IF BUILD_DOC:
-    include "mock_rados.pxi"
-ELSE:
-    from c_rados cimport *
+from c_rados cimport *
 
 import threading
 import time
