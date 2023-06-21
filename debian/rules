@@ -191,7 +191,7 @@ override_dh_python3:
 	dh_python3 -p cephadm --shebang=/usr/bin/python3
 
 override_dh_builddeb:
-	dh_builddeb ${skip_packages}
+	dh_builddeb ${skip_packages} -- -Zzstd -z3
 
 override_dh_gencontrol:
 	dh_gencontrol ${skip_packages}
