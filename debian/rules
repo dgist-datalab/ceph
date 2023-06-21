@@ -2,7 +2,7 @@
 # -*- makefile -*-
 #export DH_VERBOSE=1
 
-DEB_BUILD_OPTIONS += nocheck
+DEB_BUILD_OPTIONS += nocheck noopt
 
 DEB_HOST_ARCH_BITS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_BITS)
 export DEB_BUILD_ARCH      ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
