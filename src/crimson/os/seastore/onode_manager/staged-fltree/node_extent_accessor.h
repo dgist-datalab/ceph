@@ -206,7 +206,7 @@ class DeltaRecorderT final: public DeltaRecorder {
       default:
         SUBERROR(seastore_onode,
             "got unknown op {} when replay {}",
-            op, node);
+            static_cast<int>(op), node);
         ceph_abort("fatal error");
       }
     } catch (buffer::error& e) {

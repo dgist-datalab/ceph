@@ -164,7 +164,7 @@ void SeaStore::register_metrics()
 
   for (auto& [op_type, label] : labels_by_op_type) {
     auto desc = fmt::format("latency of seastore operation (optype={})",
-                            op_type);
+                            static_cast<int>(op_type));
     metrics.add_group(
       "seastore",
       {

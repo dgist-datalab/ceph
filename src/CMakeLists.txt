@@ -78,6 +78,7 @@ add_definitions(
   -D_THREAD_SAFE
   -D__STDC_FORMAT_MACROS
   -D_FILE_OFFSET_BITS=64
+  -DFMT_DEPRECATED_OSTREAM
   -DBOOST_ASIO_DISABLE_THREAD_KEYWORD_EXTENSION)
 if(Boost_VERSION VERSION_GREATER_EQUAL 1.74)
   add_definitions(-DBOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
@@ -575,7 +576,6 @@ endif(NOT WITH_SYSTEM_ROCKSDB)
 
 if(WITH_MGR)
   add_subdirectory(mgr)
-  add_subdirectory(exporter)
 endif()
 
 set(librados_config_srcs
@@ -873,7 +873,6 @@ add_custom_target(vstart-base DEPENDS
     ceph-mon
     ceph-authtool
     ceph-conf
-    ceph-exporter
     monmaptool
     crushtool
     rados)
@@ -886,7 +885,6 @@ endif()
 
 if (WITH_MGR)
   add_dependencies(vstart-base ceph-mgr)
-  add_dependencies(vstart-base ceph-exporter)
 endif()
 
 add_custom_target(vstart DEPENDS vstart-base)

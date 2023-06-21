@@ -253,7 +253,8 @@ bool Replayer<I>::get_replay_status(std::string* description,
 
   json_spirit::mObject root_obj;
   root_obj["replay_state"] = replay_state;
-  root_obj["remote_snapshot_timestamp"] = remote_snap_info->timestamp.sec();
+  root_obj["remote_snapshot_timestamp"] = static_cast<uint64_t>(
+    remote_snap_info->timestamp.sec());
 
   auto matching_remote_snap_id = util::compute_remote_snap_id(
     m_state_builder->local_image_ctx->image_lock,
@@ -267,8 +268,8 @@ bool Replayer<I>::get_replay_status(std::string* description,
     // use the timestamp from the matching remote image since
     // the local snapshot would just be the time the snapshot was
     // synced and not the consistency point in time.
-    root_obj["local_snapshot_timestamp"] =
-      matching_remote_snap_it->second.timestamp.sec();
+    root_obj["local_snapshot_timestamp"] = static_cast<uint64_t>(
+      matching_remote_snap_it->second.timestamp.sec());
   }
 
   matching_remote_snap_it = m_state_builder->remote_image_ctx->snap_info.find(
@@ -276,7 +277,8 @@ bool Replayer<I>::get_replay_status(std::string* description,
   if (m_remote_snap_id_end != CEPH_NOSNAP &&
       matching_remote_snap_it !=
         m_state_builder->remote_image_ctx->snap_info.end()) {
-    root_obj["syncing_snapshot_timestamp"] = remote_snap_info->timestamp.sec();
+    root_obj["syncing_snapshot_timestamp"] = static_cast<uint64_t>(
+	remote_snap_info->timestamp.sec());
 
     if (m_local_object_count > 0) {
       root_obj["syncing_percent"] =

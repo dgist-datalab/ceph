@@ -152,7 +152,7 @@ class TestValue final : public Value {
         }
         default:
           logger().error("OTree::TestValue::Replay: got unknown op {} when replay {:#x}+{:#x}",
-                         op, value_addr, payload_mut.get_length());
+                         static_cast<int>(op), value_addr, payload_mut.get_length());
           ceph_abort();
         }
       } catch (buffer::error& e) {

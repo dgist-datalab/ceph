@@ -140,7 +140,7 @@ int SimpleRADOSStriper::remove()
   return 0;
 }
 
-int SimpleRADOSStriper::truncate(uint64_t size)
+int SimpleRADOSStriper::truncate(size_t size)
 {
   d(5) << size << dendl;
 

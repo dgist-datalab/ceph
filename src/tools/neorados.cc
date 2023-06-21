@@ -146,7 +146,7 @@ void create(R::RADOS& r, const std::vector<std::string>& p,
 			     obj, pname));
 }
 
-inline constexpr std::size_t io_size = 4 << 20;
+inline constexpr std::uint64_t io_size = 4 << 20;
 
 void write(R::RADOS& r, const std::vector<std::string>& p, s::yield_context y)
 {
@@ -156,7 +156,7 @@ void write(R::RADOS& r, const std::vector<std::string>& p, s::yield_context y)
 
   bs::error_code ec;
   std::unique_ptr<char[]> buf = std::make_unique<char[]>(io_size);
-  std::size_t off = 0;
+  std::uint64_t off = 0;
   boost::io::ios_exception_saver ies(std::cin);
 
   std::cin.exceptions(std::istream::badbit);
