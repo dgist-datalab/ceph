@@ -69,7 +69,7 @@ extraopts += -DWITH_SYSTEMD=ON -DCEPH_SYSTEMD_ENV_DIR=/etc/default
 extraopts += -DCMAKE_INSTALL_SYSCONFDIR=/etc
 extraopts += -DSYSTEMD_SYSTEM_UNIT_DIR=/lib/systemd/system
 extraopts += -DWITH_RADOSGW_KAFKA_ENDPOINT=OFF
-extraopts += -DCMAKE_BUILD_TYPE=RelWithDebInfo
+extraopts += -DCMAKE_BUILD_TYPE=Debug
 extraopts += -DWITH_GRAFANA=ON
 extraopts += -DWITH_RADOSGW_SELECT_PARQUET=OFF
 
