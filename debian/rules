@@ -102,11 +102,6 @@ else
   extraopts += -DWITH_BOOST_CONTEXT=ON
 endif
 
-# Use build time calculation unless pkg.ceph.unleashed profile enabled
-ifeq ($(filter pkg.ceph.unleashed,$(DEB_BUILD_PROFILES)),)
-MAX_PARALLEL ?= $(shell ./debian/calc-max-parallel.sh)
-endif
-
 %:
 	dh $@ --buildsystem=cmake --with javahelper,python3,systemd $(MAX_PARALLEL)
 
