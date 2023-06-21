@@ -8,11 +8,7 @@ DEB_HOST_ARCH_BITS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_BITS)
 export DEB_BUILD_ARCH      ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 export DEB_HOST_ARCH      ?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 
-# support ccache for faster build
-# cmake uses /usr/bin/c*
-ifeq (yes,$(findstring yes,$(shell test -L /usr/lib/ccache/c++ && test -L /usr/lib/ccache/cc && echo -n yes)))
-  extraopts += -DWITH_CCACHE=ON
-endif
+extraopts += -DWITH_CCACHE=ON
 
 # Don't switch to clang for Ubuntu - armhf builder is
 # just fine using g++
