@@ -78,9 +78,9 @@ extraopts += -DWITH_RADOSGW_SELECT_PARQUET=OFF
 ifneq (,$(findstring $(DEB_HOST_ARCH),amd64 arm64 ppc64el))
 extraopts += -DWITH_RBD_RWL=ON
 extraopts += -DWITH_RBD_SSD_CACHE=ON
-extraopts += -DWITH_SYSTEM_PMDK=ON
-extraopts += -DWITH_BLUESTORE_PMEM=ON
-extraopts += -DWITH_SPDK=ON
+extraopts += -DWITH_SYSTEM_PMDK=OFF
+extraopts += -DWITH_BLUESTORE_PMEM=OFF
+extraopts += -DWITH_SPDK=OFF
 else
 extraopts += -DWITH_SPDK=OFF
 endif
